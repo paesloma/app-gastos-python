@@ -16,7 +16,7 @@ REPO_NAME = "paesloma/app-gastos-python"
 FILE_PATH = "finanzas.csv"
 FOLDER_IMAGES = "comprobantes"
 
-st.set_page_config(page_title="AppFinanzas Pro", layout="wide")
+st.set_page_config(page_title="FINANZAS PABLO LOPEZ", layout="wide")
 
 # --- SEGURIDAD PIN 1602 ---
 def check_password():

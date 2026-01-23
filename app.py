@@ -16,7 +16,7 @@ REPO_NAME = "paesloma/app-gastos-python"
 FILE_PATH = "finanzas.csv"
 FOLDER_IMAGES = "comprobantes"
 
-st.set_page_config(page_title="AppFinanzas Pro - Multimedia", layout="wide")
+st.set_page_config(page_title="AppFinanzas Pro", layout="wide")
 
 # --- SEGURIDAD PIN 1602 ---
 def check_password():
@@ -55,31 +55,27 @@ def guardar_todo_en_github(df, sha_csv, imagen_bytes=None, nombre_img=None):
     if imagen_bytes and nombre_img:
         path_img = f"{FOLDER_IMAGES}/{nombre_img}"
         try:
-            repo.create_file(path_img, f"Archivo comprobante {nombre_img}", imagen_bytes)
+            repo.create_file(path_img, f"Archivo {nombre_img}", imagen_bytes)
         except: pass
-
     csv_content = df.to_csv(index=False)
     if sha_csv:
-        repo.update_file(FILE_PATH, "Sincronización completa", csv_content, sha_csv)
+        repo.update_file(FILE_PATH, "Sincronización multimedia", csv_content, sha_csv)
     else:
         repo.create_file(FILE_PATH, "Carga inicial", csv_content)
 
 # --- APP PRINCIPAL ---
 if check_password():
-    st.title("💰 AppFinanzas Pro: Gestión Total")
+    st.title("💰 AppFinanzas Pro")
     df, sha = cargar_datos_de_github()
 
     # --- MÉTRICAS DE BALANCE ---
     if not df.empty:
         df['Monto'] = pd.to_numeric(df['Monto'], errors='coerce').fillna(0)
-        total_i = df[df['Tipo'] == 'Ingreso']['Monto'].sum()
-        total_g = df[df['Tipo'] == 'Gasto']['Monto'].sum()
-        balance = total_i - total_g
-
-        col_m1, col_m2, col_m3 = st.columns(3)
-        col_m1.metric("Total Ingresos", f"${total_i:,.2f}")
-        col_m2.metric("Total Gastos", f"${total_g:,.2f}", delta=f"-${total_g:,.2f}", delta_color="inverse")
-        col_m3.metric("Balance Neto", f"${balance:,.2f}", delta=f"${balance:,.2f}")
+        t_i = df[df['Tipo'] == 'Ingreso']['Monto'].sum()
+        t_g = df[df['Tipo'] == 'Gasto']['Monto'].sum()
+        st.columns(3)[0].metric("Ingresos", f"${t_i:,.2f}")
+        st.columns(3)[1].metric("Gastos", f"${t_g:,.2f}", delta=f"-${t_g:,.2f}", delta_color="inverse")
+        st.columns(3)[2].metric("Balance", f"${t_i - t_g:,.2f}")
         st.divider()
 
     with st.sidebar:
@@ -89,76 +85,63 @@ if check_password():
         concepto = st.text_input("Concepto")
         monto = st.number_input("Monto ($)", min_value=0.0, format="%.2f")
         cat = st.selectbox("Categoría", ["Otros", "Alimentación", "Sueldo", "Vivienda", "Salud", "Transporte"])
-        
-        st.divider()
         metodo = st.radio("Comprobante:", ["Subir archivo (Galería)", "Cámara en vivo"], index=0)
         archivo = st.camera_input("Capturar") if metodo == "Cámara en vivo" else st.file_uploader("Adjuntar", type=["jpg", "png", "jpeg", "pdf"])
         
         if st.button("Guardar Registro"):
             if concepto:
                 nuevo_id = int(df["ID"].max() + 1) if not df.empty else 1
-                # Guardamos con la extensión original si es archivo
                 ext = archivo.name.split('.')[-1] if (archivo and hasattr(archivo, 'name')) else "png"
                 nombre_img = f"doc_{nuevo_id}.{ext}" if archivo else "Sin imagen"
-                
-                nueva_fila = pd.DataFrame([{
-                    "ID": nuevo_id, "Fecha": fecha.strftime("%Y-%m-%d"),
-                    "Tipo": tipo, "Concepto": concepto, "Monto": monto,
-                    "Categoria": cat, "Imagen": nombre_img
-                }])
+                nueva_fila = pd.DataFrame([{"ID": nuevo_id, "Fecha": fecha.strftime("%Y-%m-%d"), "Tipo": tipo, "Concepto": concepto, "Monto": monto, "Categoria": cat, "Imagen": nombre_img}])
                 df = pd.concat([df, nueva_fila], ignore_index=True)
-                datos = archivo.getvalue() if archivo else None
-                guardar_todo_en_github(df, sha, datos, nombre_img)
-                st.success("✅ ¡Guardado!")
+                guardar_todo_en_github(df, sha, archivo.getvalue() if archivo else None, nombre_img)
+                st.success("✅ Guardado")
                 st.rerun()
 
-    # --- HISTORIAL Y BOTONES DE ACCIÓN ---
+    # --- HISTORIAL CON CLIC PARA DESCARGAR ---
     if not df.empty:
-        st.subheader("📋 Historial de Movimientos")
-        st.dataframe(df.sort_values("ID", ascending=False), use_container_width=True)
+        st.subheader("📋 Historial (Haz clic en la imagen para descargar)")
         
-        col_btn1, col_btn2 = st.columns([1, 1])
-        with col_btn1:
+        # Creamos una copia para mostrar con enlaces
+        df_display = df.copy()
+        base_url = f"https://raw.githubusercontent.com/{REPO_NAME}/main/{FOLDER_IMAGES}/"
+        
+        # Transformamos el nombre de la imagen en un link de descarga real
+        df_display['Descargar'] = df_display['Imagen'].apply(
+            lambda x: f"{base_url}{x}" if x != "Sin imagen" else None
+        )
+
+        # Configuramos st.data_editor para que la columna 'Descargar' sea un link clickeable
+        st.data_editor(
+            df_display.sort_values("ID", ascending=False),
+            column_config={
+                "Descargar": st.column_config.LinkColumn(
+                    "Enlace de Imagen",
+                    help="Haz clic para descargar el archivo directamente",
+                    validate="^https://.*",
+                    display_text="Descargar archivo"
+                )
+            },
+            disabled=True, # Evita que se editen las celdas
+            use_container_width=True,
+            hide_index=True
+        )
+
+        # BOTÓN EXCEL Y BORRADO
+        col1, col2 = st.columns(2)
+        with col1:
             buffer = io.BytesIO()
             with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-                df.to_excel(writer, index=False, sheet_name='Finanzas')
-            st.download_button("📥 Descargar Reporte Excel", buffer.getvalue(), f"Finanzas_{datetime.now().strftime('%Y%m%d')}.xlsx", "application/vnd.ms-excel")
-
-        with col_btn2:
-            with st.expander("🗑️ Eliminar un registro"):
-                id_borrar = st.number_input("ID a eliminar:", min_value=1, step=1)
-                if st.button("Confirmar Borrado"):
-                    df = df[df["ID"] != id_borrar]
+                df.to_excel(writer, index=False)
+            st.download_button("📥 Descargar Tabla Completa (Excel)", buffer.getvalue(), "Finanzas.xlsx")
+        with col2:
+            with st.expander("🗑️ Borrar"):
+                id_b = st.number_input("ID a eliminar:", min_value=1, step=1)
+                if st.button("Confirmar"):
+                    df = df[df["ID"] != id_b]
                     guardar_todo_en_github(df, sha)
                     st.rerun()
-
-        # --- VISUALIZACIÓN Y DESCARGA DE IMAGEN ---
-        st.divider()
-        st.subheader("🖼️ Visor de Comprobantes")
-        id_ver = st.number_input("Ingresa ID para ver/descargar comprobante:", min_value=1, step=1)
-        fila_img = df[df["ID"] == id_ver]
-        
-        if not fila_img.empty:
-            img_name = fila_img["Imagen"].values[0]
-            if img_name != "Sin imagen":
-                url = f"https://raw.githubusercontent.com/{REPO_NAME}/main/{FOLDER_IMAGES}/{img_name}"
-                
-                # Mostrar imagen
-                st.image(url, width=400)
-                
-                # BOTÓN DE DESCARGA PARA LA IMAGEN
-                try:
-                    response = requests.get(url)
-                    st.download_button(
-                        label=f"📥 Descargar archivo: {img_name}",
-                        data=response.content,
-                        file_name=img_name,
-                        mime="image/png"
-                    )
-                except:
-                    st.error("No se pudo preparar la descarga de la imagen.")
-            else:
-                st.info("Este registro no tiene un archivo adjunto.")
 
     if st.sidebar.button("Cerrar Sesión"):
         st.session_state["password_correct"] = False

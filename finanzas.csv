@@ -3,3 +3,4 @@ ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 2,Gasto,sd,35.0,Salud,2026-01-23,doc_2.jpg
 3,Gasto,sd,35.0,Salud,2026-01-23,Sin imagen
 4,Gasto,monito,75.0,Transporte,2026-01-23,Sin imagen
+5,Gasto,monito,75.0,Transporte,2026-01-23,doc_5.jpg

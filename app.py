@@ -43,8 +43,11 @@ def cargar_datos_de_github():
         repo = conectar_github()
         contents = repo.get_contents(FILE_PATH)
         df = pd.read_csv(io.StringIO(contents.decoded_content.decode('utf-8')))
+        # Asegurar que las columnas necesarias existan
         if "Imagen" not in df.columns:
             df["Imagen"] = "Sin imagen"
+        if "Fecha" not in df.columns:
+            df["Fecha"] = datetime.now().strftime("%Y-%m-%d")
         return df, contents.sha
     except:
         return pd.DataFrame(columns=["ID", "Fecha", "Tipo", "Concepto", "Monto", "Categoria", "Imagen"]), None
@@ -59,7 +62,7 @@ def guardar_todo_en_github(df, sha_csv, imagen_bytes=None, nombre_img=None):
 
     csv_content = df.to_csv(index=False)
     if sha_csv:
-        repo.update_file(FILE_PATH, "Update con Balance y Multimedia", csv_content, sha_csv)
+        repo.update_file(FILE_PATH, "Update con Balance", csv_content, sha_csv)
     else:
         repo.create_file(FILE_PATH, "Carga inicial", csv_content)
 
@@ -68,17 +71,20 @@ if check_password():
     st.title("💰 AppFinanzas Pro: Control de Balance")
     df, sha = cargar_datos_de_github()
 
-    # --- SECCIÓN DE BALANCE (MÉTRICAS) ---
+    # --- SECCIÓN DE BALANCE ---
     if not df.empty:
+        # Aseguramos que los montos sean numéricos
+        df['Monto'] = pd.to_numeric(df['Monto'], errors='coerce').fillna(0)
+        
         total_ingresos = df[df['Tipo'] == 'Ingreso']['Monto'].sum()
         total_gastos = df[df['Tipo'] == 'Gasto']['Monto'].sum()
         balance_neto = total_ingresos - total_gastos
 
         col_m1, col_m2, col_m3 = st.columns(3)
-        col_m1.metric("Total Ingresos", f"${total_ingresos:,.2f}", color="normal")
+        # Eliminamos el argumento 'color' que causaba el error
+        col_m1.metric("Total Ingresos", f"${total_ingresos:,.2f}")
         col_m2.metric("Total Gastos", f"${total_gastos:,.2f}", delta=f"-${total_gastos:,.2f}", delta_color="inverse")
-        # El balance cambia de color según si es positivo o negativo
-        col_m3.metric("Balance Neto (Saldo)", f"${balance_neto:,.2f}", delta=f"${balance_neto:,.2f}", delta_color="normal" if balance_neto >= 0 else "inverse")
+        col_m3.metric("Balance Neto", f"${balance_neto:,.2f}", delta=f"${balance_neto:,.2f}", delta_color="normal")
         st.divider()
 
     with st.sidebar:
@@ -86,26 +92,22 @@ if check_password():
         fecha = st.date_input("Fecha", datetime.now())
         tipo = st.selectbox("Tipo", ["Gasto", "Ingreso"])
         concepto = st.text_input("Concepto")
-        monto = st.number_input("Monto ($)", min_value=0.0)
+        monto = st.number_input("Monto ($)", min_value=0.0, format="%.2f")
         cat = st.selectbox("Categoría", ["Alimentación", "Sueldo", "Vivienda", "Salud", "Transporte", "Otros"])
         
         st.divider()
-        metodo_archivo = st.radio(
-            "Seleccionar comprobante:", 
-            ["Subir archivo (Galería)", "Cámara en vivo"],
-            index=0 # Garantiza que la cámara esté apagada al inicio
-        )
+        metodo = st.radio("Comprobante:", ["Subir archivo (Galería)", "Cámara en vivo"], index=0)
         
-        archivo_comprobante = None
-        if metodo_archivo == "Cámara en vivo":
-            archivo_comprobante = st.camera_input("Capturar foto")
+        archivo = None
+        if metodo == "Cámara en vivo":
+            archivo = st.camera_input("Capturar")
         else:
-            archivo_comprobante = st.file_uploader("Adjuntar archivo (Imagen o PDF)", type=["jpg", "png", "jpeg", "pdf"])
+            archivo = st.file_uploader("Adjuntar", type=["jpg", "png", "jpeg", "pdf"])
         
-        if st.button("Guardar Registro"):
+        if st.button("Guardar en GitHub"):
             if concepto:
                 nuevo_id = int(df["ID"].max() + 1) if not df.empty else 1
-                nombre_img = f"doc_{nuevo_id}.png" if archivo_comprobante else "Sin imagen"
+                nombre_img = f"doc_{nuevo_id}.png" if archivo else "Sin imagen"
                 
                 nueva_fila = pd.DataFrame([{
                     "ID": nuevo_id, "Fecha": fecha.strftime("%Y-%m-%d"),
@@ -114,32 +116,27 @@ if check_password():
                 }])
                 
                 df = pd.concat([df, nueva_fila], ignore_index=True)
-                datos_archivo = archivo_comprobante.getvalue() if archivo_comprobante else None
-                guardar_todo_en_github(df, sha, datos_archivo, nombre_img)
-                st.success("✅ ¡Guardado y Sincronizado!")
+                datos = archivo.getvalue() if archivo else None
+                guardar_todo_en_github(df, sha, datos, nombre_img)
+                st.success("✅ Guardado correctamente")
                 st.rerun()
 
-    # --- HISTORIAL Y VISUALIZACIÓN ---
+    # --- HISTORIAL ---
     if not df.empty:
-        st.subheader("📋 Historial Detallado")
+        st.subheader("📋 Historial")
         st.dataframe(df.sort_values("Fecha", ascending=False), use_container_width=True)
         
-        col_view, col_graf = st.columns([1, 1])
-        
-        with col_view:
-            st.write("🔍 **Visualizador de Comprobantes**")
-            id_ver = st.number_input("Ver comprobante de ID:", min_value=1, step=1)
+        col_img, col_chart = st.columns([1, 1])
+        with col_img:
+            id_ver = st.number_input("Ver comprobante ID:", min_value=1, step=1)
             fila = df[df["ID"] == id_ver]
-            if not fila.empty:
-                img_name = fila["Imagen"].values[0]
-                if img_name != "Sin imagen":
-                    url = f"https://raw.githubusercontent.com/{REPO_NAME}/main/{FOLDER_IMAGES}/{img_name}"
-                    st.image(url, caption=f"Documento ID {id_ver}", width=350)
-                else:
-                    st.info("No hay archivo adjunto para este registro.")
+            if not fila.empty and fila["Imagen"].values[0] != "Sin imagen":
+                url = f"https://raw.githubusercontent.com/{REPO_NAME}/main/{FOLDER_IMAGES}/{fila['Imagen'].values[0]}"
+                st.image(url, width=350)
+            elif not fila.empty:
+                st.info("No hay imagen.")
 
-        with col_graf:
-            st.write("📊 **Distribución de Flujo**")
+        with col_chart:
             resumen = df.groupby('Tipo')['Monto'].sum().reset_index()
             st.bar_chart(data=resumen, x='Tipo', y='Monto', color='Tipo')
 

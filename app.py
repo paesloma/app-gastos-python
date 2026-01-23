@@ -45,7 +45,7 @@ def guardar_en_github(df, sha):
         repo.create_file(FILE_PATH, "Carga inicial con fechas", csv_content)
 
 # --- INICIO DE LA APP ---
-st.title("💰 AppFinanzas Pro: Control con Fechas")
+st.title(" FINANZAS PABLO ESTEBAN LOPEZ MARTINEZ")
 df, sha = cargar_datos_de_github()
 
 # --- SIDEBAR: REGISTRO ---

@@ -63,7 +63,7 @@ def guardar_en_github(df, sha):
 # --- FLUJO PRINCIPAL ---
 if check_password():
     # Si el PIN es correcto, se muestra el resto de la App
-    st.title("💰 Mi Gestor Financiero (Protegido)")
+    st.title("💰 FINANZAS PALO LOPEZ 💰")
     df, sha = cargar_datos_de_github()
 
     # --- SIDEBAR: REGISTRO ---

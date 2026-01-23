@@ -1,3 +1,4 @@
 ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 1,Ingreso,DEPOSITO INCIAL,1500.0,Vivienda,2025-12-03,Sin imagen
 2,Gasto,PAGO DE ARENA,205.0,Vivienda,2025-12-16,Sin imagen
+3,Gasto,PAGO MAESTROS,180.0,Vivienda,2025-12-19,Sin imagen

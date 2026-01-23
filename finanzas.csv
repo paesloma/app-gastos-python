@@ -1,3 +1,4 @@
 ID,Tipo,Concepto,Monto,Categoria
 1,Ingreso,REPO,10.0,Alimentación
 2,Ingreso,REPARACIONES,10.0,Otros
+3,Gasto,SALIDA 2025/07,25.0,Alimentación

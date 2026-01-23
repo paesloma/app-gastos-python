@@ -65,7 +65,7 @@ def guardar_todo_en_github(df, sha_csv, imagen_bytes=None, nombre_img=None):
 
 # --- APP PRINCIPAL ---
 if check_password():
-    st.title("💰 FINANZAS PABLO LOPEZ")
+    st.title("💰 FINANZAS CONSTRUCCION ")
     df, sha = cargar_datos_de_github()
 
     # --- SECCIÓN DE BALANCE (ALINEACIÓN CORREGIDA) ---

@@ -17,3 +17,4 @@ ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 17,Gasto,Pago ferretería disco corte,11.25,Vivienda,2026-01-27,doc_17.jpg
 18,Gasto,Bloques,385.53,Vivienda,2026-01-27,doc_18.jpg
 19,Ingreso,Deposito,1000.0,Vivienda,2026-01-27,doc_19.jpg
+20,Gasto,Pago maestros,180.0,Vivienda,2026-01-30,doc_20.jpg

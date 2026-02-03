@@ -19,3 +19,4 @@ ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 19,Ingreso,Deposito,1000.0,Vivienda,2026-01-27,doc_19.jpg
 20,Gasto,Pago maestros,180.0,Vivienda,2026-01-30,doc_20.jpg
 21,Gasto,Pago oficial,150.0,Vivienda,2026-01-30,Sin imagen
+22,Gasto,Pago ripio correccion,95.0,Otros,2026-01-26,Sin imagen

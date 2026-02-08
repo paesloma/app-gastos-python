@@ -23,3 +23,4 @@ ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 23,Ingreso,Pago deuda pablo,20.0,Alimentación,2026-01-26,Sin imagen
 24,Gasto,Pago maestro,180.0,Vivienda,2026-02-06,doc_24.jpg
 25,Gasto,Pago ayudante,120.0,Vivienda,2026-02-06,doc_25.jpg
+26,Gasto,Día de trabajo maestro,36.0,Vivienda,2026-02-07,doc_26.jpg

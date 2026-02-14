@@ -28,3 +28,4 @@ ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 28,Gasto,PAGO FERRETEIA FACTURA  21717,50.6,Vivienda,2026-02-11,doc_28.jpg
 29,Gasto,PAGO FERRETERIA ,105.0,Vivienda,2026-02-13,doc_29.jpg
 30,Ingreso,Ajuste deuda,118.12,Vivienda,2026-02-14,Sin imagen
+31,Gasto,Pago maestro,180.0,Vivienda,2026-02-14,doc_31.jpg

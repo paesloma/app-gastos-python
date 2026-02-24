@@ -30,3 +30,4 @@ ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 30,Ingreso,Ajuste deuda,118.12,Vivienda,2026-02-14,Sin imagen
 31,Gasto,Pago maestro,180.0,Vivienda,2026-02-14,doc_31.jpg
 32,Gasto,pago oficial,60.0,Otros,2026-02-24,Sin imagen
+33,Gasto,pago maestro,144.0,Vivienda,2026-02-24,doc_33.png

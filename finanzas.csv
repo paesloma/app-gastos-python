@@ -38,3 +38,4 @@ ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 38,Gasto,PAGO MAESTRO PINCIPAL,180.0,Vivienda,2026-02-27,doc_38.png
 39,Gasto,PAGO OFICIAL,150.0,Vivienda,2026-02-27,doc_39.png
 40,Gasto,Ferreteria,39.0,Otros,2026-03-06,doc_40.png
+41,Gasto,Ferreteria,3.0,Vivienda,2026-03-06,doc_41.png

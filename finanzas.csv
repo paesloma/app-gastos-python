@@ -43,3 +43,4 @@ ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 43,Ingreso,JARDIN AZUAYO,100.0,Vivienda,2026-03-08,Sin imagen
 44,Gasto,PAGO MAESTROS OFICIAL,150.0,Vivienda,2026-03-07,Sin imagen
 45,Gasto,pago ferreteria,53.4,Vivienda,2026-03-11,doc_45.jpeg
+46,Gasto,FERRETERIA,12.01,Otros,2026-03-12,doc_46.png

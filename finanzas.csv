@@ -46,3 +46,4 @@ ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 46,Gasto,FERRETERIA,12.01,Otros,2026-03-12,doc_46.png
 47,Gasto,PAGO DE BODA,300.0,Otros,2026-03-12,Sin imagen
 48,Ingreso,Transfer,1300.0,Vivienda,2026-03-13,doc_48.jpg
+49,Gasto,pago maestro semana 13,180.0,Vivienda,2026-03-13,doc_49.jpeg

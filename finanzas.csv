@@ -45,3 +45,4 @@ ID,Tipo,Concepto,Monto,Categoria,Fecha,Imagen
 45,Gasto,pago ferreteria,53.4,Vivienda,2026-03-11,doc_45.jpeg
 46,Gasto,FERRETERIA,12.01,Otros,2026-03-12,doc_46.png
 47,Gasto,PAGO DE BODA,300.0,Otros,2026-03-12,Sin imagen
+48,Ingreso,Transfer,1300.0,Vivienda,2026-03-13,doc_48.jpg
